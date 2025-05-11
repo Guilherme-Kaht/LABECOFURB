@@ -1,0 +1,110 @@
+---
+title: "Guilherme Kaht - PIB per Capita"
+format:
+  html:
+    css: style.css
+    toc: false
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+::: divider
+:::
+
+```{r}
+# Carregamento de pacotes
+library(tidyverse)
+library(WDI)
+options(scipen = 999)
+
+# Requisição de dados
+pib_per_capita <- WDI(country = "all", indicator = "NY.GDP.PCAP.CD")
+pib_per_capita <- pib_per_capita %>%
+  mutate(destaque = if_else(iso2c == "US", "EUA", "Outros"))
+
+pib_per_capita_2023 <- WDI(country = "all", indicator = "NY.GDP.PCAP.CD", start = 2023, end = 2023)
+top15_pib_per_capita <- pib_per_capita_2023 %>%
+  arrange(desc(NY.GDP.PCAP.CD)) %>%
+  slice(1:15)
+
+pib_brasil_per_capita <- pib_per_capita %>% filter(iso2c == "BR")
+
+# Gráficos
+grafico_eua <- ggplot(pib_per_capita, aes(x = year, y = NY.GDP.PCAP.CD, group = country)) +
+  geom_line(aes(color = destaque), alpha = 0.7, size = 0.8) +
+  scale_color_manual(values = c("EUA" = "red", "Outros" = "grey85")) +
+  labs(title = "PIB Per Capita no Mundo - Destaque para os EUA", x = "Ano", y = "PIB Per Capita (USD)", color = "País") +
+  theme_minimal(base_size = 13)
+
+grafico_top15 <- ggplot(top15_pib_per_capita, aes(x = reorder(country, NY.GDP.PCAP.CD), y = NY.GDP.PCAP.CD)) +
+  geom_bar(stat = "identity", fill = "#000080") +
+  coord_flip() +
+  labs(title = "Top 15 Países - PIB Per Capita (2023)", x = "País", y = "PIB Per Capita (USD)") +
+  theme_minimal(base_size = 13) +
+  theme(plot.background = element_rect(fill = "#eaffea", color = NA),
+        panel.background = element_rect(fill = "#eaffea", color = NA),
+        axis.text.x = element_text(angle = 45, hjust = 1))
+
+grafico_brasil <- ggplot(pib_brasil_per_capita, aes(x = year, y = NY.GDP.PCAP.CD)) +
+  geom_line(color = "#6A0DAD", size = 1.2) +
+  geom_point(color = "#6A0DAD", size = 2) +
+  labs(title = "PIB Per Capita do Brasil - Série Histórica", x = "Ano", y = "PIB Per Capita (USD)") +
+  theme_minimal(base_family = "Helvetica", base_size = 13)
+```
+
+::: graph-container
+🔎 **O que é?** O PIB per capita, ou Produto Interno Bruto por pessoa, é um indicador econômico que mede a riqueza média por habitante de um país, região ou município, calculando-se o PIB total dividido pela população. É uma medida frequentemente usada para comparar o nível de desenvolvimento e renda de diferentes áreas.
+
+🧮 **Cálculo**: O PIB per capita é calculado dividindo o Produto Interno Bruto (PIB) de uma região pelo número de habitantes.
+
+💰 **Significado**: Refere-se à riqueza média que cada pessoa poderia ter se o PIB fosse distribuído igualmente entre todos os habitantes.
+
+📊 **Utilidade:** É um indicador útil para avaliar o nível de desenvolvimento econômico de um local e comparar com outros locais.
+⚠️ Limitações: Não reflete a distribuição de renda, ou seja, não indica como a riqueza é dividida entre a população.
+
+📌 **Exemplo:** Em 2024, o PIB per capita do Brasil foi de R$ 55.247,45. Isso significa que, em média, cada brasileiro teria acesso a essa quantidade de riqueza se o PIB fosse distribuído igualmente.  
+
+::: divider
+
+<h2>🌍📈 Gráfico 1: Evolução Global com Destaque para os EUA 🇺🇸</h2>
+
+<p>Este gráfico ilustra a evolução histórica do <strong>PIB per capita</strong> em diversos países ao longo dos anos, destacando especialmente os <strong>Estados Unidos</strong> 🇺🇸. A linha em vermelho representa a trajetória econômica norte-americana, enquanto os demais países aparecem em tons de cinza, permitindo uma comparação clara entre a maior economia do mundo e a média global. 📊</p>
+
+<p>Observa-se um crescimento constante no <strong>PIB per capita dos EUA</strong>, refletindo a robustez da sua economia ao longo das décadas. Esse desempenho pode ser atribuído a fatores como inovação tecnológica 💻, investimentos em educação 🎓, estabilidade institucional ⚖️ e forte capacidade de consumo interno 🛒.</p>
+
+<p>O gráfico permite visualizar de forma clara as diferenças de ritmo no crescimento econômico entre os países, evidenciando desigualdades regionais e o papel de políticas econômicas sustentáveis no desenvolvimento das nações.</p>
+
+<p><strong>📚 Fonte:</strong> Banco Mundial - Biblioteca WDI</p>
+
+
+```{r}
+grafico_eua
+```
+
+<h2>💸🌐 Gráfico 2: Ranking dos 15 Países com Maior PIB Per Capita em 2023 🏆</h2>
+
+<p>Este gráfico apresenta os <strong>15 países com o maior PIB per capita</strong> em 2023, destacando as nações que possuem, em média, os maiores níveis de renda por habitante no mundo. 🧑‍💼💰</p>
+
+<p>O <strong>PIB per capita</strong> é um importante indicador para compreender o padrão de vida médio da população e o grau de desenvolvimento econômico de um país. Os países que aparecem no topo deste ranking geralmente contam com economias altamente industrializadas, fortes setores de serviços, estabilidade política e social, além de políticas públicas eficazes. 📈🏦</p>
+
+<p>Entre os líderes do ranking, é comum encontrar <strong>pequenos países com grande concentração de riqueza</strong>, como Luxemburgo 🇱🇺 ou Singapura 🇸🇬, assim como nações com forte desempenho em setores estratégicos, como tecnologia, finanças e recursos naturais.</p>
+
+<p>Este tipo de comparação permite entender não apenas o nível de riqueza, mas também provoca reflexões sobre <strong>distribuição de renda</strong> e <strong>qualidade de vida</strong> em diferentes partes do mundo. 🌎🤔</p>
+
+<p><strong>📚 Fonte:</strong> Banco Mundial - Biblioteca WDI</p>
+
+
+```{r}
+grafico_top15
+```
+
+<h2>📉📊 Gráfico 3: Evolução Histórica do PIB Per Capita no Brasil 🇧🇷</h2> <p>Este gráfico ilustra a <strong>evolução histórica do PIB per capita</strong> do Brasil, mostrando os impactos de <em>políticas econômicas</em>, <em>crises financeiras</em> e <em>períodos de crescimento econômico</em> ao longo do tempo. 📈🔍</p> <p>O <strong>PIB per capita</strong> é um importante reflexo da <strong>renda média</strong> por habitante e do <strong>desenvolvimento econômico</strong> de um país. Este indicador é fundamental para compreender como a economia de um país se desenvolve e como as condições de vida da população mudam ao longo dos anos. 💵📊</p> <p>Observando a linha do tempo, podemos identificar <strong>momentos de expansão econômica</strong>, como períodos de crescimento acelerado, e <strong>momentos de retração</strong>, que coincidem com crises ou instabilidades internas. 💼⚠️ A análise desse gráfico também nos permite refletir sobre a <strong>evolução do bem-estar social</strong> à medida que o Brasil enfrenta diferentes desafios econômicos. 🌱💡</p> <p><strong>📚 Fonte:</strong> Banco Mundial - Biblioteca WDI 🌍</p>
+
+```{r}
+grafico_brasil
+```
+
+</div>
+:::
