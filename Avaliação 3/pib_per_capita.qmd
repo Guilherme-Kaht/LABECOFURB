@@ -1,0 +1,85 @@
+---
+title: "Guilherme Kaht, Isaque Beyer e Vitor Possamai - PIB per Capita"
+format:
+  html:
+    css: style.css
+    toc: false
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+::: divider
+:::
+
+```{r}
+# Carregamento de pacotes
+library(tidyverse)
+library(WDI)
+library(maps)
+library(gganimate)
+library(gifski)
+
+# Baixa dados para vários anos
+pib_per_capita <- WDI(
+  country = "all", 
+  indicator = "NY.GDP.PCAP.CD", 
+  start = 2000, 
+  end = 2023
+) %>%
+  rename(pib_per_capita = NY.GDP.PCAP.CD) %>%
+  filter(!is.na(pib_per_capita))
+
+# Ajusta nomes para bater com o mapa
+pib_per_capita <- pib_per_capita %>%
+  mutate(country = case_when(
+    iso2c == "US" ~ "USA",
+    iso2c == "RU" ~ "Russia",
+    iso2c == "IR" ~ "Iran",
+    iso2c == "VE" ~ "Venezuela",
+    iso2c == "EG" ~ "Egypt",
+    TRUE ~ country
+  ))
+
+# Carrega dados do mapa
+mapa_mundo <- map_data("world")
+
+# Junta dados do mapa com o PIB por ano
+mapa_com_pib <- mapa_mundo %>%
+  left_join(pib_per_capita, by = c("region" = "country")) %>%
+  filter(!is.na(pib_per_capita))
+
+# Cria o gráfico base
+ggplot(mapa_com_pib, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = pib_per_capita), color = "black", size = 0.1) +
+  scale_fill_gradientn(
+    colors = c("#5e3c99", "#b2abd2", "#f7f7f7", "#fdb863", "#e66101"),
+    trans = "log10",
+    breaks = c(500, 2000, 8000, 32000),
+    labels = scales::dollar_format()
+  ) +
+  labs(
+    title = "PIB per capita (US$) - Ano: {frame_time}",
+    fill = "PIB per capita"
+  ) +
+  theme_void() +
+  coord_fixed(ratio = 1.3) +
+  # Adiciona a animação por ano
+  transition_time(year) +
+  ease_aes("linear")
+```
+
+::: graph-container
+🔎 **O que é?** O PIB per capita, ou Produto Interno Bruto por pessoa, é um indicador econômico que mede a riqueza média por habitante de um país, região ou município, calculando-se o PIB total dividido pela população. É uma medida frequentemente usada para comparar o nível de desenvolvimento e renda de diferentes áreas.
+
+🧮 **Cálculo**: O PIB per capita é calculado dividindo o Produto Interno Bruto (PIB) de uma região pelo número de habitantes.
+
+💰 **Significado**: Refere-se à riqueza média que cada pessoa poderia ter se o PIB fosse distribuído igualmente entre todos os habitantes.
+
+📊 **Utilidade:** É um indicador útil para avaliar o nível de desenvolvimento econômico de um local e comparar com outros locais.
+⚠️ Limitações: Não reflete a distribuição de renda, ou seja, não indica como a riqueza é dividida entre a população.
+
+📌 **Exemplo:** Em 2024, o PIB per capita do Brasil foi de R$ 55.247,45. Isso significa que, em média, cada brasileiro teria acesso a essa quantidade de riqueza se o PIB fosse distribuído igualmente.  
+
+::: divider
