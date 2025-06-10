@@ -1,0 +1,64 @@
+---
+title: "Guilherme Kaht - Índice de Liquidez"
+format:
+  html:
+    css: style.css
+    toc: false
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+<b>✅ O que é o Índice de Liquidez medido pelo BACEN? </b>
+
+<b>📌 Definição:</b> O índice de liquidez medido pelo Banco Central do Brasil (BACEN) é uma métrica que avalia a capacidade das instituições financeiras (como bancos, cooperativas e financeiras) de honrarem suas obrigações no curto prazo — especialmente em situações de estresse no sistema financeiro.
+
+Esse índice faz parte das regras prudenciais do sistema bancário brasileiro, com o objetivo de garantir a solidez, estabilidade e segurança do sistema financeiro como um todo.
+
+<b>🏦 Índices de Liquidez no Sistema Bancário – Basileia III</b>
+
+O BACEN adota os parâmetros definidos pelo Acordo de Basileia III, que determina dois principais indicadores de liquidez para os bancos:
+
+```{r}
+# Carregamento de pacotes
+library(GetBCBData)
+library(ggplot2)
+library(gganimate)
+library(transformr)
+library(gifski)
+```
+
+```{r}
+my.id <- c(cdi = 29407)
+```
+
+# Gráfico histórico do Índice de Liquidez
+
+```{r}
+
+library(ggplot2)
+library(gganimate)
+library(gifski)
+library(ragg)
+library(GetBCBData)
+
+df.bcb <- gbcbd_get_series(
+  id = my.id,
+  format.data = "long",
+  use.memoise = TRUE,
+  cache.path = tempdir(),
+  do.parallel = FALSE
+)
+
+p <- ggplot(df.bcb, aes(x = ref.date, y = value)) +
+  geom_line(color = "orange") +
+  labs(
+    title    = "Índice de Liquidez",
+    subtitle = paste0(min(df.bcb$ref.date), " a ", max(df.bcb$ref.date)),
+    x = "", y = "Índice"
+  ) +
+  theme_light() +
+  transition_reveal(ref.date)
+p
+```
